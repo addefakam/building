@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: shop_management_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: shop_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shop_management_backend
+    environment:
+      # Use the db service name as the host
+      - DATABASE_URL=postgresql://admin:adminpassword@db:5432/shop_management?schema=public
+      - JWT_SECRET=super_secret_docker_jwt_key_123!
+      - FRONTEND_URL=http://localhost:80
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    restart: unless-stopped
+    # Automatically apply migrations before starting the Node server
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Change this if you deploy to a live domain
+        - VITE_API_URL=http://localhost:3001/api
+    container_name: shop_management_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
