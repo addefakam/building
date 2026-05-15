@@ -20,18 +20,23 @@ export default defineConfig({
           {
             src: "logo192.png",
             type: "image/png",
-            sizes: "192x192"
+            sizes: "192x192",
+            purpose: "any maskable"
           },
           {
             src: "logo512.png",
             type: "image/png",
-            sizes: "512x512"
+            sizes: "512x512",
+            purpose: "any maskable"
           }
         ],
-        start_url: ".",
+        start_url: "/",
         display: "standalone",
         theme_color: "#0f172a",
         background_color: "#0f172a"
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
       }
     })
   ],
